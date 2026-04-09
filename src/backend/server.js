@@ -5,6 +5,7 @@ import rateLimit from 'express-rate-limit';
 import config from './config.js';
 import client from './db/client.js';
 import { initSchema } from './db/schema.js';
+import { seedDatabase } from './db/seed.js';
 
 // Route imports
 import authRoutes from './routes/auth.js';
@@ -81,6 +82,8 @@ async function start() {
 
     console.log('[init] Connecting Cassandra client...');
     await client.connect();
+
+    await seedDatabase(client);
 
     app.listen(config.port, () => {
       console.log(`[server] MediLog API running on http://localhost:${config.port}`);
