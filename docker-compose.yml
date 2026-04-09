@@ -1,0 +1,56 @@
+services:
+  # ── Apache Cassandra ─────────────────────────────────────────────
+  cassandra:
+    image: cassandra:4.1
+    container_name: medilog-cassandra
+    ports:
+      - "9042:9042"
+    volumes:
+      - cassandra-data:/var/lib/cassandra
+    environment:
+      - CASSANDRA_CLUSTER_NAME=medilog
+      - CASSANDRA_DC=datacenter1
+      - CASSANDRA_ENDPOINT_SNITCH=GossipingPropertyFileSnitch
+      - HEAP_NEWSIZE=128M
+      - MAX_HEAP_SIZE=512M
+    healthcheck:
+      test: ["CMD-SHELL", "cqlsh -e 'DESCRIBE KEYSPACES' || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
+    restart: unless-stopped
+
+  # ── Backend API ──────────────────────────────────────────────────
+  backend:
+    build:
+      context: ./src/backend
+    container_name: medilog-backend
+    ports:
+      - "4000:4000"
+    environment:
+      - PORT=4000
+      - CASSANDRA_CONTACT_POINTS=cassandra
+      - CASSANDRA_LOCAL_DC=datacenter1
+      - CASSANDRA_KEYSPACE=medilog
+      - CASSANDRA_USERNAME=
+      - CASSANDRA_PASSWORD=
+      - JWT_SECRET=change-me-to-a-long-random-string
+    depends_on:
+      cassandra:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ── Frontend (nginx + built React SPA) ───────────────────────────
+  frontend:
+    build:
+      context: ./src/frontend
+    container_name: medilog-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  cassandra-data:
