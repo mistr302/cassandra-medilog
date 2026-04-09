@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Stethoscope } from 'lucide-react';
 
@@ -62,6 +62,9 @@ export default function Login() {
             {loading ? 'Signing in...' : 'Sign In'}
           </button>
         </form>
+        <p style={{ textAlign: 'center', marginTop: '1rem' }}>
+          Don't have an account? <Link to="/register">Register</Link>
+        </p>
       </div>
     </div>
   );
