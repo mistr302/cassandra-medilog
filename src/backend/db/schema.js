@@ -137,6 +137,15 @@ export async function initSchema() {
       count     COUNTER,
       PRIMARY KEY ((month), drug_id)
     )`,
+
+    `CREATE TABLE IF NOT EXISTS drugs (
+      drug_id     UUID PRIMARY KEY,
+      name        TEXT,
+      generic_name TEXT,
+      category    TEXT,
+      description TEXT,
+      created_at  TIMESTAMP
+    )`,
   ];
 
   for (const stmt of statements) {
@@ -165,6 +174,12 @@ export async function initSchema() {
   await client.execute(`
     CREATE INDEX IF NOT EXISTS idx_patients_national_id
     ON patients (national_id)
+  `);
+
+  // Secondary index on drugs.name for search
+  await client.execute(`
+    CREATE INDEX IF NOT EXISTS idx_drugs_name
+    ON drugs (name)
   `);
 
   await client.shutdown();

@@ -6,6 +6,61 @@ const router = Router();
 
 router.use(authenticate);
 
+// GET /api/drugs — List all drugs in the catalog
+router.get('/', async (req, res, next) => {
+  try {
+    const result = await client.execute('SELECT * FROM drugs');
+
+    const drugs = result.rows.map((row) => ({
+      drug_id: row.drug_id?.toString(),
+      name: row.name,
+      generic_name: row.generic_name,
+      category: row.category,
+      description: row.description,
+      created_at: row.created_at,
+    }));
+
+    res.json({ drugs });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// GET /api/drugs/:id — Get a single drug by ID
+router.get('/:id', async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    // Check if this is an interaction check (id1/interactions/id2)
+    if (id === 'interactions') {
+      return next();
+    }
+
+    const result = await client.execute(
+      'SELECT * FROM drugs WHERE drug_id = ?',
+      [id],
+    );
+
+    if (result.rowLength === 0) {
+      return res.status(404).json({ error: 'Drug not found' });
+    }
+
+    const row = result.first();
+    res.json({
+      drug: {
+        drug_id: row.drug_id?.toString(),
+        name: row.name,
+        generic_name: row.generic_name,
+        category: row.category,
+        description: row.description,
+        created_at: row.created_at,
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
 // GET /api/drugs/:id1/interactions/:id2  — Q7
 router.get('/:id1/interactions/:id2', async (req, res, next) => {
   try {
@@ -36,7 +91,8 @@ router.get('/:id1/interactions/:id2', async (req, res, next) => {
 
 // GET /api/patients/:patientId/interaction-check
 // Checks all active prescriptions for a patient against each other
-router.get('/patients/:patientId/interaction-check', async (req, res, next) => {
+// Note: This route is mounted at /api/patients via server.js
+router.get('/:patientId/interaction-check', async (req, res, next) => {
   try {
     const patientId = req.params.patientId;
 

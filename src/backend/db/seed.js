@@ -24,6 +24,7 @@ export async function seedDatabase(client) {
 
   // ── Fixed UUIDs for reproducible test data ───────────────────
   const doctorIds = {
+    test:     Uuid.fromString('00000000-0000-0000-0000-000000000000'),
     smith:    Uuid.fromString('11111111-1111-1111-1111-111111111111'),
     johnson:  Uuid.fromString('22222222-2222-2222-2222-222222222222'),
     nurse:    Uuid.fromString('33333333-3333-3333-3333-333333333333'),
@@ -53,6 +54,7 @@ export async function seedDatabase(client) {
 
   // ── Doctors ──────────────────────────────────────────────────
   const doctors = [
+    [doctorIds.test, 'test@test.com', passwordHash, 'Test', 'User', 'doctor', 'General Practice'],
     [doctorIds.smith, 'smith@medilog.test', passwordHash, 'John', 'Smith', 'doctor', 'Cardiology'],
     [doctorIds.johnson, 'johnson@medilog.test', passwordHash, 'Sarah', 'Johnson', 'doctor', 'General Practice'],
     [doctorIds.nurse, 'nurse@medilog.test', passwordHash, 'Emily', 'Brown', 'nurse', null],
@@ -81,6 +83,28 @@ export async function seedDatabase(client) {
       `INSERT INTO patients (patient_id, first_name, last_name, birth_date, national_id, blood_type, allergies, phone, email, created_at)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, toTimestamp(now()))`,
       [p[0], p[1], p[2], types.LocalDate.fromString(p[3]), p[4], p[5], p[6], p[7], p[8]],
+    );
+  }
+
+  // ── Drugs Catalog ──────────────────────────────────────────────
+  const drugs = [
+    [drugIds.ibuprofen, 'Ibuprofen', 'Ibuprofen', 'NSAID', 'Nonsteroidal anti-inflammatory drug for pain and inflammation'],
+    [drugIds.amoxicillin, 'Amoxicillin', 'Amoxicillin', 'Antibiotic', 'Penicillin-type antibiotic for bacterial infections'],
+    [drugIds.metformin, 'Metformin', 'Metformin hydrochloride', 'Antidiabetic', 'First-line medication for type 2 diabetes'],
+    [drugIds.lisinopril, 'Lisinopril', 'Lisinopril', 'ACE Inhibitor', 'Treats high blood pressure and heart failure'],
+    [drugIds.warfarin, 'Warfarin', 'Warfarin sodium', 'Anticoagulant', 'Blood thinner to prevent blood clots'],
+    [drugIds.aspirin, 'Aspirin', 'Acetylsalicylic acid', 'NSAID', 'Pain reliever and blood thinner'],
+    [drugIds.omeprazole, 'Omeprazole', 'Omeprazole', 'Proton Pump Inhibitor', 'Reduces stomach acid production'],
+    [Uuid.fromString('d8888888-d888-d888-d888-d88888888888'), 'Atorvastatin', 'Atorvastatin calcium', 'Statin', 'Lowers cholesterol and triglycerides'],
+    [Uuid.fromString('d9999999-d999-d999-d999-d99999999999'), 'Amlodipine', 'Amlodipine besylate', 'Calcium Channel Blocker', 'Treats high blood pressure and chest pain'],
+    [Uuid.fromString('da000000-da00-da00-da00-da0000000000'), 'Levothyroxine', 'Levothyroxine sodium', 'Thyroid Hormone', 'Treats hypothyroidism'],
+  ];
+
+  for (const d of drugs) {
+    await client.execute(
+      `INSERT INTO drugs (drug_id, name, generic_name, category, description, created_at)
+       VALUES (?, ?, ?, ?, ?, toTimestamp(now()))`,
+      d,
     );
   }
 
@@ -225,8 +249,15 @@ export async function seedDatabase(client) {
   }
 
   console.log('[seed] Database seeded successfully');
-  console.log('[seed] Test accounts (password: test123):');
-  console.log('[seed]   doctor:  smith@medilog.test / johnson@medilog.test');
-  console.log('[seed]   nurse:   nurse@medilog.test');
-  console.log('[seed]   admin:   admin@medilog.test');
+  console.log('[seed] ');
+  console.log('[seed] ═══════════════════════════════════════════════════════');
+  console.log('[seed]  TEST ACCOUNTS (password for all: test123)');
+  console.log('[seed] ═══════════════════════════════════════════════════════');
+  console.log('[seed]  ★ Quick Test:  test@test.com');
+  console.log('[seed]  ─────────────────────────────────────────────────────');
+  console.log('[seed]  Doctors:       smith@medilog.test');
+  console.log('[seed]                 johnson@medilog.test');
+  console.log('[seed]  Nurse:         nurse@medilog.test');
+  console.log('[seed]  Admin:         admin@medilog.test');
+  console.log('[seed] ═══════════════════════════════════════════════════════');
 }

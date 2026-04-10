@@ -52,13 +52,11 @@ app.use('/api/patients/:id/prescriptions', prescriptionRoutes);
 app.use('/api/patients/:id/medications', medicationRoutes);
 app.use('/api/patients/:id/audit', auditRoutes);
 app.use('/api/drugs', drugRoutes);
+app.use('/api/patients', drugRoutes); // For /api/patients/:patientId/interaction-check
 app.use('/api/analytics', analyticsRoutes);
 
 // Appointments have a non-standard mount — the router handles its own sub-paths
 app.use('/api', appointmentRoutes);
-
-// Drug interaction check is mounted under patients in the drugs router
-// /api/patients/:patientId/interaction-check is handled by drugRoutes
 
 // ── Health check ────────────────────────────────────────────────
 app.get('/api/health', (_req, res) => res.json({ status: 'ok' }));
