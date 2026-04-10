@@ -36,6 +36,7 @@ services:
       - CASSANDRA_USERNAME=
       - CASSANDRA_PASSWORD=
       - JWT_SECRET=change-me-to-a-long-random-string
+      - SEED_DB=true
     depends_on:
       cassandra:
         condition: service_healthy

@@ -13,10 +13,13 @@ const Uuid = types.Uuid;
 export async function seedDatabase(client) {
   if (process.env.SEED_DB !== 'true') return;
 
-  // Check if data already exists (idempotent)
-  const existing = await client.execute('SELECT doctor_id FROM doctors LIMIT 1');
+  // Check if test data already exists (idempotent)
+  const existing = await client.execute(
+    'SELECT doctor_id FROM doctors WHERE email = ?',
+    ['test@test.com']
+  );
   if (existing.rowLength > 0) {
-    console.log('[seed] Database already has data, skipping seed');
+    console.log('[seed] Test data already exists, skipping seed');
     return;
   }
 
@@ -193,15 +196,35 @@ export async function seedDatabase(client) {
 
   // ── Appointments ─────────────────────────────────────────────
   const todayDate = types.LocalDate.fromDate(new Date());
-  const tomorrowDate = types.LocalDate.fromString('2026-04-10');
+  const tomorrowDate = types.LocalDate.fromString('2026-04-11');
+  const dayAfterTomorrow = types.LocalDate.fromString('2026-04-12');
+  const nextWeek = types.LocalDate.fromString('2026-04-17');
 
   const appointments = [
+    // Today - Dr. Smith
     [doctorIds.smith, todayDate, types.LocalTime.fromString('09:00:00'), Uuid.random(), patientIds.doe, 'Jane Doe', 'Follow-up: hypertension', 'scheduled'],
     [doctorIds.smith, todayDate, types.LocalTime.fromString('10:30:00'), Uuid.random(), patientIds.novak, 'Peter Novak', 'INR check and warfarin review', 'scheduled'],
     [doctorIds.smith, todayDate, types.LocalTime.fromString('14:00:00'), Uuid.random(), patientIds.garcia, 'Carlos Garcia', 'Diabetes management review', 'scheduled'],
+    [doctorIds.smith, todayDate, types.LocalTime.fromString('15:30:00'), Uuid.random(), patientIds.kim, 'Sun Kim', 'New patient consultation', 'scheduled'],
+    // Today - Dr. Johnson
     [doctorIds.johnson, todayDate, types.LocalTime.fromString('08:30:00'), Uuid.random(), patientIds.mueller, 'Anna Mueller', 'Lab results review', 'completed'],
     [doctorIds.johnson, todayDate, types.LocalTime.fromString('11:00:00'), Uuid.random(), patientIds.kim, 'Sun Kim', 'Follow-up: antibiotics', 'scheduled'],
+    [doctorIds.johnson, todayDate, types.LocalTime.fromString('13:00:00'), Uuid.random(), patientIds.doe, 'Jane Doe', 'Respiratory follow-up', 'scheduled'],
+    [doctorIds.johnson, todayDate, types.LocalTime.fromString('16:00:00'), Uuid.random(), patientIds.novak, 'Peter Novak', 'Blood pressure check', 'cancelled'],
+    // Tomorrow
     [doctorIds.smith, tomorrowDate, types.LocalTime.fromString('09:00:00'), Uuid.random(), patientIds.garcia, 'Carlos Garcia', 'HbA1c recheck', 'scheduled'],
+    [doctorIds.smith, tomorrowDate, types.LocalTime.fromString('10:00:00'), Uuid.random(), patientIds.mueller, 'Anna Mueller', 'Annual physical', 'scheduled'],
+    [doctorIds.smith, tomorrowDate, types.LocalTime.fromString('11:30:00'), Uuid.random(), patientIds.doe, 'Jane Doe', 'Medication adjustment', 'scheduled'],
+    [doctorIds.johnson, tomorrowDate, types.LocalTime.fromString('09:30:00'), Uuid.random(), patientIds.novak, 'Peter Novak', 'Cardiac consultation', 'scheduled'],
+    [doctorIds.johnson, tomorrowDate, types.LocalTime.fromString('14:00:00'), Uuid.random(), patientIds.kim, 'Sun Kim', 'Prescription renewal', 'scheduled'],
+    // Day after tomorrow
+    [doctorIds.smith, dayAfterTomorrow, types.LocalTime.fromString('08:00:00'), Uuid.random(), patientIds.kim, 'Sun Kim', 'Follow-up visit', 'scheduled'],
+    [doctorIds.johnson, dayAfterTomorrow, types.LocalTime.fromString('10:00:00'), Uuid.random(), patientIds.garcia, 'Carlos Garcia', 'Diabetes education', 'scheduled'],
+    [doctorIds.johnson, dayAfterTomorrow, types.LocalTime.fromString('15:00:00'), Uuid.random(), patientIds.mueller, 'Anna Mueller', 'Vaccination', 'scheduled'],
+    // Next week
+    [doctorIds.smith, nextWeek, types.LocalTime.fromString('09:00:00'), Uuid.random(), patientIds.doe, 'Jane Doe', 'Monthly check-up', 'scheduled'],
+    [doctorIds.smith, nextWeek, types.LocalTime.fromString('11:00:00'), Uuid.random(), patientIds.novak, 'Peter Novak', 'Warfarin dose review', 'scheduled'],
+    [doctorIds.johnson, nextWeek, types.LocalTime.fromString('10:00:00'), Uuid.random(), patientIds.garcia, 'Carlos Garcia', 'Lab work review', 'scheduled'],
   ];
 
   for (const a of appointments) {

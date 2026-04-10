@@ -52,12 +52,15 @@ router.post('/login', async (req, res, next) => {
     }
 
     const result = await client.execute('SELECT * FROM doctors WHERE email = ?', [email]);
+    console.log('[auth] Login attempt for:', email, '- found rows:', result.rowLength);
     if (result.rowLength === 0) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
     const doctor = result.first();
+    console.log('[auth] Doctor found:', doctor.email, '- has password_hash:', !!doctor.password_hash);
     const valid = await bcrypt.compare(password, doctor.password_hash);
+    console.log('[auth] Password valid:', valid);
     if (!valid) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
